@@ -1,0 +1,5 @@
+# all env files
+*.env
+
+# node mdukes
+node_modules
