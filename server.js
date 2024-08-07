@@ -9,6 +9,9 @@ const app = express();
 // set a port - listen changes on the port
 const port = 4000;
 
+// allow cors origin
+app.use(cors());
+
 
 // import routes
 const workoutRoutes = require('./routes/workouts')
