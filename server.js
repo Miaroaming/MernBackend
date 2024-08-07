@@ -1,5 +1,7 @@
 // DotEnv
 require('dotenv').config()
+// cors
+const cors = require('cors');
 // bring in Express
 const express = require('express');
 // mongoose:
