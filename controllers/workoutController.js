@@ -7,8 +7,16 @@ const mongoose = require('mongoose')
 
 // Get all workouts
 const getWorkouts = async (req, res) => {
-    const workouts = await Workout.find({}).sort({createdAt: -1})
-    res.status(200).json(workouts)
+    try {
+        const workouts = await Workout.find({}).populate({
+            path: 'comments',
+            model: 'Comment'
+        }).sort({createdAt: -1})
+        res.status(200).json(workouts)
+    } catch (error) {
+        console.error(error);
+        res.status(500).josn({error: 'Internal server error'})
+    }
 }
 
 // Get single workout
@@ -18,23 +26,34 @@ const getWorkout = async (req, res) => {
     if(!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(404).json({error: 'No such workout'});
     }
-    // try find a workout by its id
-    const workout = await Workout.findById(id)
-    // if no workout found show an error
-    if (!workout) {
+
+    try {
+        // find the workout, populate the comments array with the comment document
+        const workout = await Workout.findById(id).populate({
+            path: 'comments',
+            model: 'Comments' // Reference the comments model
+        })
+
+        // if no workout found show an error
+        if(!workout) {
         return res.status(404).json({error: 'No such workout'});
-    }
-    // otherwise return the workout found
-    res.status(200).json(workout)
+        }
+
+         // otherwsie return the workout found
+        res.status(200).json(workout)
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({error: "Internal Server Error"})
+    } 
 }
 
 // Create workout
 const createWorkout = async (req, res) => {
-    const {title, load, reps} = req.body
+    const {title, load, reps, user_id} = req.body
 
     //add doc to db
     try {
-        const workout = await Workout.create({title, load, reps})
+        const workout = await Workout.create({title, load, reps, user_id})
         res.status(200).json(workout)
     } catch (error) {
         res.status(400).json({error: error.message})
@@ -58,7 +77,7 @@ const deleteWorkout = async (req, res) => {
     }
 
     // if it successfully finds and deletes:
-    res.status(200).json(workout + ' successfully deleted');
+    res.status(200).json(workout);
 }
 
 // Update workout
